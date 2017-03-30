@@ -6,14 +6,26 @@ import path from 'path'
 import chalk from 'chalk'
 import bodyParser from 'body-parser'
 import router from './api/v1/routes'
+import passport from 'passport'
+import googlePassportStrategy from './oauth'
+
+passport.serializeUser( ( user, done ) => done( null, user ) )
+passport.deserializeUser( ( obj, done ) => done( null, obj ) )
+
+//HACK: name change?
+passport.use( googlePassportStrategy )
+
 
 const server = express()
 
 server.set( 'port', process.env.PORT || '1337' )
+server.use( passport.initialize() )
+
 server.use( express.static( 'public' ))
 
 server.use( bodyParser.json() )
 server.use( router )
+
 
 server.get('*', ( request, response ) =>
   response.sendFile( path.join( __dirname, '/../../public/index.html' ) )
